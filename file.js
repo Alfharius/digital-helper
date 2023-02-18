@@ -6,36 +6,45 @@
 // @author       You
 // @match        https://grants.myrosmol.ru/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
-// @grant        none
 // ==/UserScript==
 
 (function () {
     'use strict';
-
+    if (!window.jQuery) { //костыль, извЕните
+        fetch('https://code.jquery.com/jquery-3.6.0.min.js')
+            .then(res => res.clone().text())
+            .then(text => {
+                eval(text);
+            })
+    }
 
     const createModal = (title) => {
         const modalWrapper = document.createElement('div');
         modalWrapper.className = 'base-alert base-alert--success';
+        modalWrapper.style.marginBottom = '0px';
         const modal = document.createElement('div');
         modal.className = 'base-alert__content';
         const description = document.createElement('p');
         description.innerText = title;
+        modalWrapper.style.padding = '0 5px';
 
         modal.append(description)
         modalWrapper.append(modal)
         return modalWrapper
     }
 
-    const removeModal = () => {
-
+    const removeModal = (modal) => {
+        modal.remove();
     }
 
     const buttonInModal = (x, y) => {
         const button = document.createElement('button');
         button.type = 'button';
-        const style = `padding: 5px; position: absolute; left: ${x}px; top: ${y}px; z-index: 1000;`;
+        const style = `width: 25px; height: 25px; padding: 0px; position: absolute; left: ${x}px; top: ${y}px; z-index: 1000;`;
         button.style = style;
-        button.textContent = '+'
+        button.style.backgroundColor = '#fff';
+        button.style.border = '1px solid #acb5bd';
+        button.innerHTML = '<svg fill="none" xmlns="http://www.w3.org/2000/svg" style="color: var(--color-primary);" viewBox="0 0 24 24" focusable="false"><path d="M12 4a1 1 0 00-1 1v6H5a1 1 0 100 2h6v6a1 1 0 102 0v-6h6a1 1 0 100-2h-6V5a1 1 0 00-1-1z" fill="currentColor"></path></svg>'
         return button;
     }
 
@@ -43,30 +52,40 @@
         const button = buttonInModal(x, y);
         document.getElementById('app').append(button);
         button.addEventListener('click', () => {
+            button.style.width = 'auto';
+            button.style.height = 'auto';
+            button.innerHTML = '';
             button.append(createModal(title));
-        })
+            button.disabled = true;
+        });
+        button.addEventListener('mouseover', (e) => {
+
+            button.addEventListener('mouseout', (e) => {
+                removeModal(button);
+            });
+        });
     }
 
     const addEvent = (baseInput, baseTextArea, baseMultiSelect, baseDatePicker) => {
         baseInput.forEach(input => {
-            input.addEventListener('click', (event) => {
-                initiateModal(input.children[1].title, event.pageX, event.pageY)
+            input.addEventListener('click', (e) => {
+                initiateModal(input.children[1].title, e.pageX, e.pageY)
             })
         });
         baseTextArea.forEach(textArea => {
-            textArea.addEventListener('click', (event) => {
-                initiateModal(textArea.children[1].title, event.pageX, event.pageY)
+            textArea.addEventListener('click', (e) => {
+                initiateModal(textArea.children[1].title, e.pageX, e.pageY)
             })
         })
         baseMultiSelect.forEach(multiSelect => {
-            multiSelect.addEventListener('click', (event) => {
+            multiSelect.addEventListener('click', (e) => {
                 console.log(multiSelect)
-                initiateModal(multiSelect.children[1].title, event.pageX, event.pageY)
+                initiateModal(multiSelect.children[1].title, e.pageX, e.pageY)
             })
         })
         baseDatePicker.forEach(datePicker => {
-            datePicker.addEventListener('click', (event) => {
-                initiateModal(datePicker.children[1].title, event.pageX, event.pageY)
+            datePicker.addEventListener('click', (e) => {
+                initiateModal(datePicker.children[1].title, e.pageX, e.pageY)
             })
         })
     }
